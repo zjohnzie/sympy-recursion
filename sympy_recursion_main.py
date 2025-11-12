@@ -6,27 +6,45 @@ def euler_formula(theta):
 
 def ivp_calculation(ivp_input):
     if type(ivp_input) is list:
+        
+        ### IVP Input form being a matrix should be structured with the vector equation below satisfied:
+        ### \vec{f} = A\vec{b}
+        ### where f_{i} = c_{0}*term_{0}(i) + c_{1}*term_{1}(i) + ... + c_{n}*term_{n}(i)
+        ### so that the constants, c_{j}, can be solved using row reduction and returned as a list
+        
         arr = np.array(ivp_input)
         if arr.ndim > 2:
-            print("This is a 3-dimensional or higher tensor! This is not the correct data form!\n")
+            print("IVP 1: This is a 3-dimensional or higher tensor! This is not the correct data form!\n")
             return
         elif arr.ndim == 1:
-            print("this is not a matrix bruh\n")
+            print("IVP 2: this is not a matrix bruh\n")
             return
             
         elif arr.shape[0] == 1 or arr.shape[1] == 1:
-            print("bruh this is a vector, not an effin matrix")
+            print("IVP 3: bruh this is a vector, not an effin matrix")
             print("ill deal with this later as an assumed form of [f0, f1, ...] k?\n")
             return
         else:
-            print(":?\n")
-        matrix = sympy.Matrix(arr)
-        print(f"Original matrix is: {matrix}")
-        matrix = matrix.rref()[0]
-        print(f"Solved matrix is: {matrix}")
+            print("IVP 4: :?\n")
+        sp_matrix = sympy.Matrix(arr)
+        print(f"IVP 5: Original matrix is: {sp_matrix}")
+        sp_matrix = sp_matrix.rref()[0]
+        print(f"Solved matrix is: {sp_matrix}")
         print('\n')
 
-        return matrix # TO BE CHANGED; NEED TO FIGURE OUT PROPER/BETTER FORM FOR IVP INPUTS AND OUTPUTS
+        constants = []
+        for idx in range(sp_matrix.rows):
+            row = sp_matrix.row(idx)
+            print(row)
+            if list(row).count(0) == len(row)-2 and row[idx] != 0:
+                constants.append(row[-1]/row[idx])
+            else:
+                print("IVP 6: Your constants are not linearly independent from at least how you've sent them to me!")
+
+        print(constants)
+                
+
+        return constants
         
 
 
@@ -39,9 +57,9 @@ def recursion_calculation(input_form):
         print(str(input_form.count(0)) + " is the number of zeroes")
 
         if len(input_form) > 5:
-            print("Cannot find symbolic roots of any quintics (at least now)\n")
+            print("REC 1: Cannot find symbolic roots of any quintics (at least now)\n")
         else:
-            print("Will do calculations!\n")
+            print("REC 2: Will do calculations!\n")
             x, n = sympy.symbols('x n')
             expr = sympy.sympify(0)
             idx = 0
