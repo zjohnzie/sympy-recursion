@@ -4,17 +4,72 @@ import numpy as np
 def euler_formula(theta):
     return sympy.cos(theta) + sympy.I*(sympy.sin(theta))
 
+def gen_sol_to_matrix(gen_sol, *args, **kwargs):
 
+    ### Takes in a given general solution in the form of a sympy expression
+    ### And outputs a square matrix for solving a given set of initial values,
+    ### where the i,j-th entry corresponds to the j-th term of the given solution
+    ### without the generalized constant in front with the value of n substituted for i+1
+    ###
+    ### The rationale is that this matrix, A, satisfies:
+    ### \vec{f} = A\vec{b}
+    ### where f_{i} = c_{0}*term_{0}(i) + c_{1}*term_{1}(i) + ... + c_{n}*term_{n}(i)
+    ### and b_{i} = c_{i}
 
+    # Currently, this will only work on equations with less than 10 constants to be determined
+    # Will need to rewrite with a new recursive function to deal with indices with more than 1 digit
+    
+    matrix = []
+
+    for term in sympy.Add.make_args(gen_sol):
+
+        for symbol in list(term.free_symbols):
+            idx_num = -1
+            if str(symbol)[0] == 'c':
+                if str(symbol)[1].isdigit():
+                    idx_num= int(str(symbol)[1])
+                elif str(symbol)[1] == '-' or str(symbol)[1] == '_':
+                    if str(symbol)[2].isdigit():
+                        idx_num = int(str(symbol)[2])
+                    elif str(symbol)[2] == '{':
+                        if str(symbol)[3].isdigit():
+                            idx_num = int(str(symbol)[3]) # this method fails to check that the notation for the constant term is closed on the right side with a curly brace
+                        else:
+                            print("MTX 1: Your IVP constants don't have proper numerical indices!")
+                    else:
+                        print("MTX 2: Your notation does not follow either latex or the accepted notation of c_n")
+                else:
+                    print("MTX 3: The next following character after \'c\' should be a number, \'-\', or \'_\'!")
+
+            if idx_num >= 0:
+                print("DO STUFF IM TIRED") # TO ADD AFTER RESTING !!!
+                
 def ivp_calculation(ivp_input):
-    if type(ivp_input) is list:
-        
-        ### IVP Input form being a matrix should be structured with the vector equation below satisfied:
-        ### \vec{f} = A\vec{b}
-        ### where f_{i} = c_{0}*term_{0}(i) + c_{1}*term_{1}(i) + ... + c_{n}*term_{n}(i)
-        ### so that the constants, c_{j}, can be solved using row reduction and returned as a list
-        
+    
+    ### IVP Input form being a matrix should be structured with the vector equation below satisfied:
+    ### \vec{f} = A\vec{b}
+    ### where f_{i} = c_{0}*term_{0}(i) + c_{1}*term_{1}(i) + ... + c_{n}*term_{n}(i)
+    ### so that the constants, c_{j}, can be solved using row reduction and returned as a list
+
+    npFlag = False
+    if isinstance(ivp_input, list):
+        if len(ivp_input) == 2:
+            if isinstance(ivp_input[0], (sympy.Add, sympy.Mul)):
+                print(f"General symbolic expression is: {ivp_input[0]}")
+                print(f"Free symbols are: {ivp_input[0].free_symbols}")
+                for symbol in list(ivp_input[0].free_symbols):
+                    # DO THE RIGHT THING DANGIT
+                    return
+            else:
+                print("IVP 7: Your list of vectors has the wrong data type for the first entry!")
+                return
         arr = np.array(ivp_input)
+        npFlag = True
+    elif isinstance(ivp_input, np.ndarray):
+        arr = ivp_input
+        npFlag = True
+        
+    if npFlag:
         if arr.ndim > 2:
             print("IVP 1: This is a 3-dimensional or higher tensor! This is not the correct data form!\n")
             return
@@ -53,11 +108,10 @@ def ivp_calculation(ivp_input):
 def recursion_solver(input_form):
     sol_eq = sympy.sympify(0)
     print(sol_eq)
-    listFlag = False
+    
     if isinstance(input_form, np.ndarray):
         arr = input_form
     elif isinstance(input_form, list): #idk how this would happen but including it anyways
-        listFlag = True
         arr = np.array(input_form)
 
     if arr.size > 5:
@@ -161,19 +215,19 @@ def recursion_format_processing(input_form, *args, **kwargs):
 
 def sym_recursion_solver_main(sequence, *args, **kwargs):
     print("We're doing this main baby!!!")
-    sequence_proper, ivp_proper, proper_flag = recursion_format_processing(sequence)
-    gen_solution = recursion_solver(sequence_proper)
+    sequence_proper, ivp_seq_proper, proper_flag = recursion_format_processing(sequence)
+    gen_expression = recursion_solver(sequence_proper)
     if proper_flag:
-        if ivp_proper.size == 0:
+        if ivp_seq_proper.size == 0:
             if sequence_proper.size == 0:
                 print("MAIN 1: Your sequence is empty buddy!!")
                 return sequence_proper
             else:
-                return gen_solution
+                return gen_expression
         else:
             # NEEDS WORK DONE ASAP!!!
             print("MAIN 3: CURRENTLY NOT WORKING OHMIGOSH IM SO SAWRRY")
-            return ivp_calculation(ivp_proper)
+            print(f"Specific solution *should* be: {ivp_calculation([gen_expression,ivp_seq_proper])}")
     else:
         print("MAIN 2: Your sequence is not an accepted format!")
         
