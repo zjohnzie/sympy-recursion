@@ -1,8 +1,12 @@
+### Dependencies
 import sympy
 import numpy as np
+import re # may remove this...
 
 def euler_formula(theta):
     return sympy.cos(theta) + sympy.I*(sympy.sin(theta))
+
+
 
 def gen_sol_to_matrix(gen_sol, *args, **kwargs):
 
@@ -19,15 +23,17 @@ def gen_sol_to_matrix(gen_sol, *args, **kwargs):
     # Currently, this will only work on equations with less than 10 constants to be determined
     # Will need to rewrite with a new recursive function to deal with indices with more than 1 digit
     
-    matrix = []
+    matrix = [None] * len(sympy.Add.make_args(gen_sol))
 
     for term in sympy.Add.make_args(gen_sol):
-
+        
+        cnst_term = sympy.sympify(0)
         for symbol in list(term.free_symbols):
-            idx_num = -1
+            
+            idx_num = -1 # can this be moved outside of this loop?
             if str(symbol)[0] == 'c':
                 if str(symbol)[1].isdigit():
-                    idx_num= int(str(symbol)[1])
+                    idx_num = int(str(symbol)[1])
                 elif str(symbol)[1] == '-' or str(symbol)[1] == '_':
                     if str(symbol)[2].isdigit():
                         idx_num = int(str(symbol)[2])
@@ -42,7 +48,27 @@ def gen_sol_to_matrix(gen_sol, *args, **kwargs):
                     print("MTX 3: The next following character after \'c\' should be a number, \'-\', or \'_\'!")
 
             if idx_num >= 0:
+                cnst_term = symbol
                 print("DO STUFF IM TIRED") # TO ADD AFTER RESTING !!!
+                break
+        if term/cnst_term == term.subs(cnst_term,1): #checks linearity
+            if matrix[idx_num] == None:
+                matrix[idx_num] = term/cnst_term
+            elif isinstance(matrix[idx_num],int):
+                matrix[idx_num] += term/cnst_term
+            elif isinstance(matrix[idx_num],sympy.Add):
+                matrix[idx_num] += term/cnst_term
+            else:
+                print("MTX 4: wtf kinda matrix you making")
+        if not args:
+            # Convert list to matrix starting from n=0 to n=N
+            general_mat = matrix
+            return general_mat
+        else:
+            # Do specific code for given IVP input
+            specific_mat = matrix
+            return specific_mat
+            
                 
 def ivp_calculation(ivp_input):
     
