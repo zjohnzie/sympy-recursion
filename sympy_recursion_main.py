@@ -6,9 +6,34 @@ import re # may remove this...
 def euler_formula(theta):
     return sympy.cos(theta) + sympy.I*(sympy.sin(theta))
 
+def matrix_to_solution(matrix, *args, **kwargs):
 
+    sol = sympy.sympify(0)
 
-def gen_sol_to_matrix(gen_sol, *args, **kwargs):
+    if isinstance(matrix,list):
+        matrix = np.array(matrix)
+
+    if matrix.dim == 2:
+        if matrix.shape[0] == 1 or matrix.shape[1] == 1:
+            
+            idx = 0
+            for entry in matrix:
+
+                c_temp = sympy.symbols('c' + str(idx))
+                if not isinstance(entry, (sympy.Add, sympy.Mul)):
+                    sol += c_temp * sympy.sympify(entry)
+                else:
+                    sol += c_temp * entry
+        else:
+            # FIGURE OUT IF POSSIBLE TO GUARANTEE FINDING SOLUTION FROM IVP MATRIX!!!
+            print(f"MAT 1: Not currently able to deal with full IVP matrices")
+            return 
+
+    return sol
+        
+        
+
+def solution_to_matrix(gen_sol, *args, **kwargs):
 
     ### Takes in a given general solution in the form of a sympy expression
     ### And outputs a square matrix for solving a given set of initial values,
@@ -24,12 +49,12 @@ def gen_sol_to_matrix(gen_sol, *args, **kwargs):
     # Will need to rewrite with a new recursive function to deal with indices with more than 1 digit
     
     matrix = [None] * len(sympy.Add.make_args(gen_sol))
-
+    print(sympy.Add.make_args(gen_sol))
     for term in sympy.Add.make_args(gen_sol):
-        
+        print(f"Current term is: {term}")
         cnst_term = sympy.sympify(0)
         for symbol in list(term.free_symbols):
-            
+            print(f"Current symbol is: {symbol}")
             idx_num = -1 # can this be moved outside of this loop?
             if str(symbol)[0] == 'c':
                 if str(symbol)[1].isdigit():
@@ -51,6 +76,7 @@ def gen_sol_to_matrix(gen_sol, *args, **kwargs):
                 cnst_term = symbol
                 print("DO STUFF IM TIRED") # TO ADD AFTER RESTING !!!
                 break
+            
         if term/cnst_term == term.subs(cnst_term,1): #checks linearity
             if matrix[idx_num] == None:
                 matrix[idx_num] = term/cnst_term
@@ -60,14 +86,16 @@ def gen_sol_to_matrix(gen_sol, *args, **kwargs):
                 matrix[idx_num] += term/cnst_term
             else:
                 print("MTX 4: wtf kinda matrix you making")
-        if not args:
-            # Convert list to matrix starting from n=0 to n=N
-            general_mat = matrix
-            return general_mat
-        else:
-            # Do specific code for given IVP input
-            specific_mat = matrix
-            return specific_mat
+                return
+                
+    if not args:
+        # Convert list to matrix starting from n=0 to n=N
+        general_mat = matrix
+        return general_mat
+    else:
+        # Do specific code for given IVP input
+        specific_mat = matrix
+        return specific_mat
             
                 
 def ivp_calculation(ivp_input):
@@ -249,6 +277,7 @@ def sym_recursion_solver_main(sequence, *args, **kwargs):
                 print("MAIN 1: Your sequence is empty buddy!!")
                 return sequence_proper
             else:
+                print(f"Matrix representation is: {solution_to_matrix(gen_expression)}")
                 return gen_expression
         else:
             # NEEDS WORK DONE ASAP!!!
@@ -308,4 +337,5 @@ sqrt5 = sympy.sqrt(5)
 
 ivp_calculation([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
 
+sym_recursion_solver_main([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
 
