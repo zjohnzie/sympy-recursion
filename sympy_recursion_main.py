@@ -12,22 +12,23 @@ def matrix_to_solution(matrix, *args, **kwargs):
 
     if isinstance(matrix,list):
         matrix = np.array(matrix)
-
-    if matrix.dim == 2:
-        if matrix.shape[0] == 1 or matrix.shape[1] == 1:
+    print(f"Matrix shape is: {matrix.shape}")
+    print(f"Matrix dimension is: {matrix.ndim}")
+    if (matrix.ndim == 2 and (matrix.shape[0] == 1 or matrix.shape[1] == 1)) or matrix.ndim == 1:
             
-            idx = 0
-            for entry in matrix:
+        idx = 0
+        for entry in matrix:
 
-                c_temp = sympy.symbols('c' + str(idx))
-                if not isinstance(entry, (sympy.Add, sympy.Mul)):
+            c_temp = sympy.symbols('c' + str(idx))
+            if not isinstance(entry, (sympy.Add, sympy.Mul)):
+                if entry != None:
                     sol += c_temp * sympy.sympify(entry)
-                else:
-                    sol += c_temp * entry
-        else:
-            # FIGURE OUT IF POSSIBLE TO GUARANTEE FINDING SOLUTION FROM IVP MATRIX!!!
-            print(f"MAT 1: Not currently able to deal with full IVP matrices")
-            return 
+            else:
+                sol += c_temp * entry
+    else:
+        # FIGURE OUT IF POSSIBLE TO GUARANTEE FINDING SOLUTION FROM IVP MATRIX!!!
+        print(f"MAT 1: Not currently able to deal with full IVP matrices")
+        return 
 
     return sol
         
@@ -98,7 +99,7 @@ def solution_to_matrix(gen_sol, *args, **kwargs):
         return specific_mat
             
                 
-def ivp_calculation(ivp_input):
+def ivp_calculation(matrix,ivp_input=[]):
     
     ### IVP Input form being a matrix should be structured with the vector equation below satisfied:
     ### \vec{f} = A\vec{b}
@@ -106,21 +107,10 @@ def ivp_calculation(ivp_input):
     ### so that the constants, c_{j}, can be solved using row reduction and returned as a list
 
     npFlag = False
-    if isinstance(ivp_input, list):
-        if len(ivp_input) == 2:
-            if isinstance(ivp_input[0], (sympy.Add, sympy.Mul)):
-                print(f"General symbolic expression is: {ivp_input[0]}")
-                print(f"Free symbols are: {ivp_input[0].free_symbols}")
-                for symbol in list(ivp_input[0].free_symbols):
-                    # DO THE RIGHT THING DANGIT
-                    return
-            else:
-                print("IVP 7: Your list of vectors has the wrong data type for the first entry!")
-                return
-        arr = np.array(ivp_input)
-        npFlag = True
-    elif isinstance(ivp_input, np.ndarray):
-        arr = ivp_input
+
+
+    if isinstance(matrix, np.ndarray):
+        arr = matrix
         npFlag = True
         
     if npFlag:
@@ -137,6 +127,11 @@ def ivp_calculation(ivp_input):
             return
         else:
             print("IVP 4: :?\n")
+        if arr.matrix.shape[1] == len(ivp_input):
+            arr = np.hstack((arr,np.array(ivp_input)))
+        else:
+            print(f"IVP 7: Your initial values don't have the proper number to determine a unique solution")
+            # Work on adding support for ivp input that follows the structure of a dictionary for a given indexed value
         sp_matrix = sympy.Matrix(arr)
         print(f"IVP 5: Original matrix is: {sp_matrix}")
         sp_matrix = sp_matrix.rref()[0]
@@ -176,7 +171,11 @@ def recursion_solver(input_form):
         expr = sympy.sympify(0)
             
         idx = 0
-        add_cnst = np.nonzero(arr)[0][-1]
+        print(f"Array is: {arr}")
+        print(f"Nonzero entries are: {np.nonzero(arr)}")
+        nz_arr = np.nonzero(arr)
+        if len(nz_arr[0]) > 0:
+            add_cnst = np.nonzero(arr)[0][-1]
                 
         for coef in input_form:
             expr += coef*(x**(-idx+add_cnst)) #This needs an explanation imo
@@ -262,22 +261,27 @@ def recursion_format_processing(input_form, *args, **kwargs):
         print("PROC 3: Working on sympy inputs PAL\n")
         # need to test variety of sympy expression concepts as even 2*f0 is not consideredof the class "Add"
         
-
+    print("PROC 4: Improper format for inputs given, returning empty lists/arrays")
+    print(f"Length of improper array is {len(input_form)}")
     return np.array([]),np.array([]), False 
 
 
 
 def sym_recursion_solver_main(sequence, *args, **kwargs):
-    print("We're doing this main baby!!!")
+    print("\nWe're doing this main baby!!!")
+    print(f"Current sequence is: {sequence}")
     sequence_proper, ivp_seq_proper, proper_flag = recursion_format_processing(sequence)
-    gen_expression = recursion_solver(sequence_proper)
     if proper_flag:
+        gen_expression = recursion_solver(sequence_proper)
         if ivp_seq_proper.size == 0:
             if sequence_proper.size == 0:
                 print("MAIN 1: Your sequence is empty buddy!!")
                 return sequence_proper
             else:
                 print(f"Matrix representation is: {solution_to_matrix(gen_expression)}")
+                expr_check = matrix_to_solution(solution_to_matrix(gen_expression))
+                print(f"Expression check gives: {expr_check}")
+                #print(f"Expression check diff gives: {expr_check - sequence}")
                 return gen_expression
         else:
             # NEEDS WORK DONE ASAP!!!
