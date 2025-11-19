@@ -268,79 +268,28 @@ def recursion_format_processing(input_form, *args, **kwargs):
 
 
 def sym_recursion_solver_main(sequence, *args, **kwargs):
-    print("\nWe're doing this main baby!!!")
-    print(f"Current sequence is: {sequence}")
-    sequence_proper, ivp_seq_proper, proper_flag = recursion_format_processing(sequence)
-    if proper_flag:
-        gen_expression = recursion_solver(sequence_proper)
-        if ivp_seq_proper.size == 0:
-            if sequence_proper.size == 0:
-                print("MAIN 1: Your sequence is empty buddy!!")
-                return sequence_proper
+    try:
+        print("\nWe're doing this main baby!!!")
+        print(f"Current sequence is: {sequence}")
+        sequence_proper, ivp_seq_proper, proper_flag = recursion_format_processing(sequence)
+        if proper_flag:
+            gen_expression = recursion_solver(sequence_proper)
+            if ivp_seq_proper.size == 0:
+                if sequence_proper.size == 0:
+                    print("MAIN 1: Your sequence is empty buddy!!")
+                    return sequence_proper
+                else:
+                    print(f"Matrix representation is: {solution_to_matrix(gen_expression)}")
+                    expr_check = matrix_to_solution(solution_to_matrix(gen_expression))
+                    print(f"Expression check gives: {expr_check}")
+                    #print(f"Expression check diff gives: {expr_check - sequence}")
+                    return gen_expression
             else:
-                print(f"Matrix representation is: {solution_to_matrix(gen_expression)}")
-                expr_check = matrix_to_solution(solution_to_matrix(gen_expression))
-                print(f"Expression check gives: {expr_check}")
-                #print(f"Expression check diff gives: {expr_check - sequence}")
-                return gen_expression
+                # NEEDS WORK DONE ASAP!!!
+                print("MAIN 3: CURRENTLY NOT WORKING OHMIGOSH IM SO SAWRRY")
+                print(f"Specific solution *should* be: {ivp_calculation([gen_expression,ivp_seq_proper])}")
         else:
-            # NEEDS WORK DONE ASAP!!!
-            print("MAIN 3: CURRENTLY NOT WORKING OHMIGOSH IM SO SAWRRY")
-            print(f"Specific solution *should* be: {ivp_calculation([gen_expression,ivp_seq_proper])}")
-    else:
-        print("MAIN 2: Your sequence is not an accepted format!")
+            print("MAIN 2: Your sequence is not an accepted format!")
+    except Exception as err:
+        print(f"Your sequence was unable to be solved due to the following error: {err}")
         
-    
-    
-## Test Cases
-'''
-
-print(f"{recursion_format_processing([1,-2])}\n")
-
-print(f"{recursion_format_processing([1,0,1])}\n")
-
-print(f"{recursion_format_processing([1,5,2])}\n")
-
-print(f"{recursion_format_processing([[1,2,3],[0,0,1]])}\n")
-
-str_test = "test"
-print(f"{recursion_format_processing(str_test)}\n")
-
-sym_recursion_solver_main([1,-2])
-
-print(len([[1,-2],[0]]))
-print(f"IVP solution is: {sym_recursion_solver_main([[1,-2],[0]])}")
-
-sym_recursion_solver_main([1,0,1])
-
-sym_recursion_solver_main([1,5,2])
-
-sym_recursion_solver_main([1,-4,3])
-
-sym_recursion_solver_main([2,0,1,3,])
-
-sym_recursion_solver_main([0,1,1])
-
-sym_recursion_solver_main([1,0,2,2])
-
-sym_recursion_solver_main([1,-2,3,4,1])
-
-sym_recursion_solver_main([1,-2,3,4,1,1])
-
-sym_recursion_solver_main([1,0,0,0,1,2,4,0,5])
-
-ivp_calculation([1,1])
-
-ivp_calculation([[1],[2]])
-
-ivp_calculation([[1,0,1],[11,0,2],[1,1,1]])
-
-f0, f1, f2, f3, f4 = sympy.symbols('f0 f1 f2 f3 f4')
-
-sqrt5 = sympy.sqrt(5)
-
-ivp_calculation([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
-
-sym_recursion_solver_main([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
-
-'''
