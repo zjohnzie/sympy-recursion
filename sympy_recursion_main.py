@@ -293,7 +293,7 @@ def sym_recursion_solver_main(sequence, *args, **kwargs):
     
     
 ## Test Cases
-
+'''
 
 print(f"{recursion_format_processing([1,-2])}\n")
 
@@ -343,3 +343,4 @@ ivp_calculation([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(
 
 sym_recursion_solver_main([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
 
+'''
