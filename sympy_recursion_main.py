@@ -9,15 +9,19 @@ def euler_formula(theta):
 
 
 def matrix_to_solution(matrix, *args, **kwargs):
-
+    """
+    Takes in a matrix (either as a list or a numpy array)
+    and outputs a sympy expression corresponding to a homogenous linear difference equation
+    i think?
+    """
     sol = sympy.sympify(0)
 
     if isinstance(matrix,list):
-        matrix = np.array(matrix)
+        if all(isinstance(item, (int, float)) for item in matrix):
+            matrix = np.array(matrix)
     print(f"Matrix shape is: {matrix.shape}")
     print(f"Matrix dimension is: {matrix.ndim}")
-    if (matrix.ndim == 2 and (matrix.shape[0] == 1 or matrix.shape[1] == 1))
-        or matrix.ndim == 1:
+    if (matrix.ndim == 2 and (matrix.shape[0] == 1 or matrix.shape[1] == 1)) or matrix.ndim == 1:
             
         idx = 0
         for entry in matrix:
@@ -26,6 +30,7 @@ def matrix_to_solution(matrix, *args, **kwargs):
             if not isinstance(entry, (sympy.Add, sympy.Mul)):
                 if entry != None:
                     sol += c_temp * sympy.sympify(entry)
+                    idx += 1
             else:
                 sol += c_temp * entry
     else:
@@ -34,11 +39,73 @@ def matrix_to_solution(matrix, *args, **kwargs):
         return 
 
     return sol
-                
+
+
+def expression_to_sequence(sym_expr, *args, **kwargs):
+    """
+    Takes a sympy expression as input and outputs a list representation of the expression
+    Currently just ignores any constant terms but could be updated to print a warning message
+    """
+    if isinstance(sym_expr, sympy.Add):
+        seq = [0]
+        seq_var_char = ""
+        for term in sympy.Add.make_args(sym_expr):
+            print(f"Current term is: {term}")
+            print(f"List of symbols in this term are: {list(term.free_symbols)}")
+            idx = -1
+            var_count = 0
+            if isinstance(term, sympy.Mul) or isinstance(term, sympy.Symbol):
+                term_coefs = sympy.sympify(1)
+                for term2 in sympy.Mul.make_args(term):
+                    print(f"Current factor is: {term2}")
+                    if isinstance(term2, sympy.Symbol):
+                        print(f" Current factor, {term2}, is a symbol!")
+                        term2_str = str(term2)
+                        if term2_str[0].isalpha() and len(term2_str) >= 2:
+                            if seq_var_char == "" or seq_var_char == term2_str[0]:
+                                if var_count <= 0:
+                                    var_count += 1
+                                    if term2_str[1:].isdecimal():
+                                        idx = int(term2_str[1:])
+                                    elif term2_str[0].isalpha() and term2_str[1] in "-_":
+                                        if term2_str[2] == "{" and term2_str[-1] == "}":
+                                            if term2_str[3:-2].isdecimal():
+                                                idx = int(term2_str[3:-2])
+                                        elif term2_str[2:].isdecimal():
+                                            idx = int(term2_str[2:])
+                                        else:
+                                            print(f"EXPR 3: Erroneous notation for index of {term2} symbol")
+                                            term_coefs *= term2
+                                    if seq_var_char == "":
+                                        seq_var_char = term2_str[0]
+                                else:
+                                    print(f"EXPR 4: {term} is a nonlinear difference term or is abusing notation!")
+                                    term_coefs *= term2
+                        else:
+                            term_coefs *= term2
+                    else:
+                        term_coefs *= term2
+                if idx >= 0:
+                    if idx > len(seq)-1:
+                        sub_seq = [0] * (idx - (len(seq)-1))
+                        seq.extend(sub_seq)
+                    seq[idx] = term_coefs
+                            
+                            
+
+            else:
+                print(f" Current term, {term}, is not a linear product!")
+        return seq
+            
+    else:
+        print(f"EXPR 1: Input is either not of the form of a proper homogenous linear difference equation or is not a sympy expression at all!")
+        return []
+
 
 def solution_to_matrix(gen_sol, *args, **kwargs):
 
     """
+     NEEDS REWRITE BADLY!!!
      Takes in a given general solution in the form of a sympy expression
      And outputs a square matrix for solving a given set of initial values,
      where the i,j-th entry corresponds to the j-th term of the given solution
@@ -53,6 +120,7 @@ def solution_to_matrix(gen_sol, *args, **kwargs):
      Will need to rewrite with a new recursive function to deal with indices with more than 1 digit
     """
     matrix = [None] * len(sympy.Add.make_args(gen_sol))
+    print(f"It is {isinstance(gen_sol, sympy.Add)} that this is a proper sympy expression")
     print(sympy.Add.make_args(gen_sol))
     for term in sympy.Add.make_args(gen_sol):
         print(f"Current term is: {term}")
@@ -197,8 +265,7 @@ def recursion_solver(input_form):
                 c_temp2 = sympy.symbols("c" + str(idx+1))
                 a = sympy.re(root)
                 b = sympy.im(root)
-                sol_eq += c_temp*sympy.cos(n*sympy.acos(a/sympy.sqrt(a**2 + b**2)))
-                        + c_temp2*sympy.sin(n*sympy.Abs(sympy.asin(b/sympy.sqrt(a**2 + b**2))))
+                sol_eq += c_temp*sympy.cos(n*sympy.acos(a/sympy.sqrt(a**2 + b**2))) + c_temp2*sympy.sin(n*sympy.Abs(sympy.asin(b/sympy.sqrt(a**2 + b**2))))
                 idx += 2
             else:
                 c_temp = sympy.symbols("c" + str(idx))
@@ -239,14 +306,25 @@ def recursion_format_processing(input_form, *args, **kwargs):
     if isinstance(input_form, list):
         if len(input_form) == 2:
             if isinstance(input_form[0], list):
-                ivp_arr = np.array(input_form[1])
-                input_form = np.array(input_form[0])
-                print(f"Your list is now proper with the sequence: {input_form} and the IVPs of: {ivp_arr}")
-                return input_form, ivp_arr, True
+                if isinstance(input_form[1], list):
+                    if (all(isinstance(item, (int, float))) for item in input_form[0]):
+                        if (all(isinstance(item, (int, float))) for item in input_form[1]):
+                            ivp_arr = np.array(input_form[1])
+                            input_form = np.array(input_form[0])
+                            print(f"Your list is now proper with the sequence: {input_form} and the IVPs of: {ivp_arr}")
+                            return input_form, ivp_arr, True
+                        else:
+                            print(f"PROC 5: Your input list does not have the proper structure in index 1 for a IVP array")
+                            return np.array([]), np.array([]), False
+                    else:
+                        print(f"PROC 6: Your input list does not have the proper structure in index 0 for a symbolic sequence")
+                        return np.array([]), np.array([]), False
 
         if all(isinstance(item, (int, float)) for item in input_form):
             input_form = np.array(input_form)
-                
+        else:
+            print(f"PROC 7: Your input list is neither in the proper form of a list, having just numbers or two proper nested lists for IVP array and symbolic sequence list")
+            return np.array([]), np.array([]), False
 
     if isinstance(input_form, np.ndarray):
         if input_form.ndim == 1:
@@ -262,7 +340,11 @@ def recursion_format_processing(input_form, *args, **kwargs):
     elif isinstance(input_form, str):
         print("PROC 2: Working on text inputs bud!!!\n")
 
-    elif isinstance(input_form, sympy.Add):
+    elif isinstance(input_form, sympy.Expr):
+        
+        input_form = expression_to_sequence(input_form)
+        return np.array(input_form), np.array([]), True
+        
         print("PROC 3: Working on sympy inputs PAL\n")
         # need to test variety of sympy expression concepts as even 2*f0 is not consideredof the class "Add"
         
@@ -286,9 +368,9 @@ def sym_recursion_solver_main(sequence, *args, **kwargs):
                     print("MAIN 1: Your sequence is empty buddy!!")
                     return sequence_proper
                 else:
-                    print(f"Matrix representation is: {solution_to_matrix(gen_expression)}")
-                    expr_check = matrix_to_solution(solution_to_matrix(gen_expression))
-                    print(f"Expression check gives: {expr_check}")
+                    #print(f"Matrix representation is: {solution_to_matrix(gen_expression)}")
+                    #expr_check = matrix_to_solution(solution_to_matrix(gen_expression))
+                    #print(f"Expression check gives: {expr_check}")
                     #print(f"Expression check diff gives: {expr_check - sequence}")
                     return gen_expression
             else:
@@ -298,5 +380,5 @@ def sym_recursion_solver_main(sequence, *args, **kwargs):
         else:
             print("MAIN 2: Your sequence is not an accepted format!")
     except Exception as err:
-        print(f"Your sequence was unable to be solved due to the following error: {err}")
+        print(f"MAIN 4: Your sequence was unable to be solved due to the following error: {err}")
         
