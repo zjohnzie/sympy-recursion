@@ -19,8 +19,8 @@ def matrix_to_solution(matrix, *args, **kwargs):
     if isinstance(matrix,list):
         if all(isinstance(item, (int, float)) for item in matrix):
             matrix = np.array(matrix)
-    print(f"Matrix shape is: {matrix.shape}")
-    print(f"Matrix dimension is: {matrix.ndim}")
+    #print(f"Matrix shape is: {matrix.shape}")
+    #print(f"Matrix dimension is: {matrix.ndim}")
     if (matrix.ndim == 2 and (matrix.shape[0] == 1 or matrix.shape[1] == 1)) or matrix.ndim == 1:
             
         idx = 0
@@ -50,16 +50,16 @@ def expression_to_sequence(sym_expr, *args, **kwargs):
         seq = [0]
         seq_var_char = ""
         for term in sympy.Add.make_args(sym_expr):
-            print(f"Current term is: {term}")
-            print(f"List of symbols in this term are: {list(term.free_symbols)}")
+            #print(f"Current term is: {term}")
+            #print(f"List of symbols in this term are: {list(term.free_symbols)}")
             idx = -1
             var_count = 0
             if isinstance(term, sympy.Mul) or isinstance(term, sympy.Symbol):
                 term_coefs = sympy.sympify(1)
                 for term2 in sympy.Mul.make_args(term):
-                    print(f"Current factor is: {term2}")
+                    #print(f"Current factor is: {term2}")
                     if isinstance(term2, sympy.Symbol):
-                        print(f" Current factor, {term2}, is a symbol!")
+                        #print(f" Current factor, {term2}, is a symbol!")
                         term2_str = str(term2)
                         if term2_str[0].isalpha() and len(term2_str) >= 2:
                             if seq_var_char == "" or seq_var_char == term2_str[0]:
@@ -116,60 +116,59 @@ def solution_to_matrix(gen_sol, *args, **kwargs):
      where f_{i} = c_{0}*term_{0}(i) + c_{1}*term_{1}(i) + ... + c_{n}*term_{n}(i)
      and b_{i} = c_{i}
 
-     Currently, this will only work on equations with less than 10 constants to be determined
-     Will need to rewrite with a new recursive function to deal with indices with more than 1 digit
     """
-    matrix = [None] * len(sympy.Add.make_args(gen_sol))
-    print(f"It is {isinstance(gen_sol, sympy.Add)} that this is a proper sympy expression")
-    print(sympy.Add.make_args(gen_sol))
-    for term in sympy.Add.make_args(gen_sol):
-        print(f"Current term is: {term}")
-        cnst_term = sympy.sympify(0)
-        for symbol in list(term.free_symbols):
-            print(f"Current symbol is: {symbol}")
-            idx_num = -1 # can this be moved outside of this loop?
-            if str(symbol)[0] == "c":
-                if str(symbol)[1].isdigit():
-                    idx_num = int(str(symbol)[1])
-                elif str(symbol)[1] == "-" or str(symbol)[1] == "_":
-                    if str(symbol)[2].isdigit():
-                        idx_num = int(str(symbol)[2])
-                    elif str(symbol)[2] == "{":
-                        if str(symbol)[3].isdigit():
-                            idx_num = int(str(symbol)[3])
-                            # this method fails to check that the notation for the
-                            # constant term is closed on the right side with a curly brace
-                        else:
-                            print("MTX 1: Your IVP constants don't have proper numerical indices!")
-                    else:
-                        print("MTX 2: Your notation does not follow either latex or the accepted notation of c_n")
-                else:
-                    print("MTX 3: The next following character after \'c\' should be a number, \'-\', or \'_\'!")
+    try:
+        sol_seq = expression_to_sequence(gen_sol)
+        print(sol_seq)
+        vector = [0] * len(sol_seq)
+        matrix = [vector] * len(sol_seq)
+        print(matrix)
+        matrix = sympy.Matrix(matrix)
+        print(matrix)
+        print(sol_seq[0].free_symbols)
+        n = sympy.symbols("n")
+        #print(sol_seq[2].subs(n, 2))
+        for idx1 in range(len(sol_seq)):
+            idx2 = 0
+            for term in sol_seq:
+                print(idx1)
+                print(term)
+                matrix[idx1, idx2] = term.subs(n, idx1)
+                idx2 += 1
+        print(matrix)
+        
 
-            if idx_num >= 0:
-                cnst_term = symbol
-                print("DO STUFF IM TIRED") # TO ADD AFTER RESTING !!!
-                break
-            
-        if term/cnst_term == term.subs(cnst_term,1): #checks linearity
-            if matrix[idx_num] == None:
-                matrix[idx_num] = term/cnst_term
-            elif isinstance(matrix[idx_num],int):
-                matrix[idx_num] += term/cnst_term
-            elif isinstance(matrix[idx_num],sympy.Add):
-                matrix[idx_num] += term/cnst_term
+        '''
+            if term/cnst_term == term.subs(cnst_term,1): #checks linearity
+                if matrix[idx_num] == None:
+                    matrix[idx_num] = term/cnst_term
+                elif isinstance(matrix[idx_num],int):
+                    matrix[idx_num] += term/cnst_term
+                elif isinstance(matrix[idx_num],sympy.Add):
+                    matrix[idx_num] += term/cnst_term
+                else:
+                    print("MTX 4: wtf kinda matrix you making")
+                    return
+        '''
+                    
+        if not args:
+            general_mat = matrix
+            return general_mat
+        else:
+            if isinstance(args, list):
+                if all(isinstance(arg, (int, float)) for arg in args):
+                    if len(args) == len(sol_seq):
+                        specific_mat = matrix.col_insert(-1, sympy.Matrix(args))
+                        return specific_mat
+                    else:
+                        print("SOL 1: Your IVP input isn't the same length as the number of constants to determine!")
+                else:
+                    print("SOL 2: Your IVP input isn't a matrix or list of integers!")
             else:
-                print("MTX 4: wtf kinda matrix you making")
-                return
-                
-    if not args:
-        # Convert list to matrix starting from n=0 to n=N
-        general_mat = matrix
-        return general_mat
-    else:
-        # Do specific code for given IVP input
-        specific_mat = matrix
-        return specific_mat
+                print("SOL 3: Your IVP input is not of the appropriate data type")
+            return matrix
+    except Exception as e:
+        print(f"SOL 1: {e}")
             
                 
 def ivp_calculation(matrix,ivp_input=[]):
@@ -228,7 +227,7 @@ def ivp_calculation(matrix,ivp_input=[]):
 
 def recursion_solver(input_form):
     sol_eq = sympy.sympify(0)
-    print(sol_eq)
+    #print(sol_eq)
     
     if isinstance(input_form, np.ndarray):
         arr = input_form
@@ -243,8 +242,8 @@ def recursion_solver(input_form):
         expr = sympy.sympify(0)
             
         idx = 0
-        print(f"Array is: {arr}")
-        print(f"Nonzero entries are: {np.nonzero(arr)}")
+        #print(f"Array is: {arr}")
+        #print(f"Nonzero entries are: {np.nonzero(arr)}")
         nz_arr = np.nonzero(arr)
         if len(nz_arr[0]) > 0:
             add_cnst = np.nonzero(arr)[0][-1]
@@ -272,10 +271,10 @@ def recursion_solver(input_form):
                 sol_eq += c_temp*(root**n)
                 idx += 1
 
-            print("\n")
+            #print("\n")
 
-    print(sol_eq)
-    print("\n")
+    #print(sol_eq)
+    #print("\n")
     return sol_eq
 
 
@@ -301,7 +300,7 @@ def recursion_format_processing(input_form, *args, **kwargs):
     # Can work on seeing if a given set of initial conditions are sufficient to specify an entire solution
     # as this seems plausible under certain structures of the sequence relation
 
-    print(type(input_form))
+    #print(type(input_form))
     ivp_arr = []
     if isinstance(input_form, list):
         if len(input_form) == 2:
@@ -311,7 +310,7 @@ def recursion_format_processing(input_form, *args, **kwargs):
                         if (all(isinstance(item, (int, float))) for item in input_form[1]):
                             ivp_arr = np.array(input_form[1])
                             input_form = np.array(input_form[0])
-                            print(f"Your list is now proper with the sequence: {input_form} and the IVPs of: {ivp_arr}")
+                            #print(f"Your list is now proper with the sequence: {input_form} and the IVPs of: {ivp_arr}")
                             return input_form, ivp_arr, True
                         else:
                             print(f"PROC 5: Your input list does not have the proper structure in index 1 for a IVP array")
@@ -328,25 +327,24 @@ def recursion_format_processing(input_form, *args, **kwargs):
 
     if isinstance(input_form, np.ndarray):
         if input_form.ndim == 1:
-            print(f"This input has the following vector: {input_form}\n")
+            #print(f"This input has the following vector: {input_form}\n")
             return input_form, np.array([]), True
         elif input_form.ndim == 2:
             # PROBABLY NEED TO ADD A CHECK FOR PROPER SHAPE OF THESE VECTORS!!!
-            print(f"The input has the following two vectors: {input_form[0]} and {input_form[1]}\n")
+            #print(f"The input has the following two vectors: {input_form[0]} and {input_form[1]}\n")
             return input_form[0], input_form[1], True
         elif input_form.ndim > 2:
             print("PROC 1: Your input has too many input rows in your numpy array\n")
             
     elif isinstance(input_form, str):
-        print("PROC 2: Working on text inputs bud!!!\n")
-
-    elif isinstance(input_form, sympy.Expr):
-        
+        input_form = sympy.parsing.sympy_parser.parse_expr(input_form)
+        print(input_form)
         input_form = expression_to_sequence(input_form)
         return np.array(input_form), np.array([]), True
         
-        print("PROC 3: Working on sympy inputs PAL\n")
-        # need to test variety of sympy expression concepts as even 2*f0 is not consideredof the class "Add"
+    elif isinstance(input_form, sympy.Expr):
+        input_form = expression_to_sequence(input_form)
+        return np.array(input_form), np.array([]), True
         
     print("PROC 4: Improper format for inputs given, returning empty lists/arrays")
     print(f"Length of improper array is {len(input_form)}")
@@ -358,8 +356,8 @@ def sym_recursion_solver_main(sequence, *args, **kwargs):
         Insert docstrings here
     """
     try:
-        print("\nWe're doing this main baby!!!")
-        print(f"Current sequence is: {sequence}")
+        print("\n~~~\nWe're doing this main baby!!!\n~~~")
+        #print(f"Current sequence is: {sequence}")
         sequence_proper, ivp_seq_proper, proper_flag = recursion_format_processing(sequence)
         if proper_flag:
             gen_expression = recursion_solver(sequence_proper)

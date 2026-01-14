@@ -1,6 +1,8 @@
 import sympy_recursion_main as srm
 import sympy
 
+print("\n--------------------\n STARTING TEST CASES \n--------------------\n")
+
 sqrt5 = sympy.sqrt(5)
 x, y, z = sympy.symbols('x y x')
 expr = x**2 + x*y - sqrt5
@@ -16,6 +18,7 @@ print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
 print(f"{srm.recursion_format_processing(expr)}")
 print(f"{srm.sym_recursion_solver_main(expr)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 
 expr = f0 + 2**2*f1 - f2 + 10*f10 
@@ -23,6 +26,16 @@ print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
 print(f"{srm.recursion_format_processing(expr)}")
 print(f"{srm.sym_recursion_solver_main(expr)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+
+
+
+expr = "f0 + 2**2*f1 - f2 + 10*f10   "
+print(expr)
+#print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
+print(f"{srm.recursion_format_processing(expr)}")
+print(f"{srm.sym_recursion_solver_main(expr)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 
 expr = f1 + f2 + f3
@@ -30,13 +43,25 @@ print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
 print(f"{srm.recursion_format_processing(expr)}")
 print(f"{srm.sym_recursion_solver_main(expr)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+
+
+expr = "  f1  + f2 + f3"
+print(expr)
+print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
+print(f"{srm.recursion_format_processing(expr)}")
+print(f"{srm.sym_recursion_solver_main(expr)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+
 
 expr = f0 + f1 + f2 + f3 + f4
 print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
 print(f"{srm.recursion_format_processing(expr)}")
 print(f"{srm.sym_recursion_solver_main(expr)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
+'''
 
 ## Test Cases
 
@@ -75,4 +100,4 @@ srm.ivp_calculation([[1,0,1],[11,0,2],[1,1,1]])
 #ivp_calculation([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
 
 #sym_recursion_solver_main([[1,1,0,0,1,f0],[0,-sqrt5,1,1,1-(1+sqrt5)/2,f1],[0,-sqrt5,4,2,-(1+sqrt5)/2,f2],[0,-2*sqrt5,9,3,-2*(1+sqrt5)/2,f3],[0,-3*sqrt5,16,4,-1-3*(1+sqrt5)/2,f4]])
-
+'''
