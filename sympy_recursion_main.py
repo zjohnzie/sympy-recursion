@@ -155,10 +155,14 @@ def solution_to_matrix(gen_sol, *args, **kwargs):
             general_mat = matrix
             return general_mat
         else:
-            if isinstance(args, list):
-                if all(isinstance(arg, (int, float)) for arg in args):
-                    if len(args) == len(sol_seq):
-                        specific_mat = matrix.col_insert(-1, sympy.Matrix(args))
+            if isinstance(args, (list, tuple)):
+                arg_check = args
+                if len(args) == 1:
+                    arg_check = args[0]
+                    print(f"\n HERES CHECKING THE ARGUMENT: {arg_check}\n")
+                if all(isinstance(arg, (int, float)) for arg in arg_check):
+                    if len(arg_check) == len(sol_seq):
+                        specific_mat = matrix.col_insert(len(sol_seq), sympy.Matrix(arg_check))
                         return specific_mat
                     else:
                         print("SOL 1: Your IVP input isn't the same length as the number of constants to determine!")
@@ -178,46 +182,56 @@ def ivp_calculation(matrix,ivp_input=[]):
      where f_{i} = c_{0}*term_{0}(i) + c_{1}*term_{1}(i) + ... + c_{n}*term_{n}(i)
      so that the constants, c_{j}, can be solved using row reduction and returned as a list
     """
-    npFlag = False
+    sympyFlag = False
 
 
     if isinstance(matrix, np.ndarray):
+        arr = sympy.Matrix(matrix)
+        sympyFlag = True
+    elif isinstance(matrix, sympy.Matrix):
         arr = matrix
-        npFlag = True
+        sympyFlag = True
+    else:
+        try:
+            arr = sympy.Matrix(matrix)
+            sympyFlag = True
+        except Exception as e:
+            print(f"IVP 8: {e}")
         
-    if npFlag:
-        if arr.ndim > 2:
+    if sympyFlag:
+        if len(sympy.shape(arr)) > 2:
             print("IVP 1: This is a 3-dimensional or higher tensor! This is not the correct data form!\n")
             return
-        elif arr.ndim == 1:
+        elif len(sympy.shape(arr)) == 1:
             print("IVP 2: this is not a matrix bruh\n")
             return
             
-        elif arr.shape[0] == 1 or arr.shape[1] == 1:
+        elif sympy.shape(arr)[0] == 1 or sympy.shape(arr)[1] == 1:
             print("IVP 3: bruh this is a vector, not an effin matrix")
             print("ill deal with this later as an assumed form of [f0, f1, ...] k?\n")
             return
         else:
             print("IVP 4: :?\n")
-        if arr.matrix.shape[1] == len(ivp_input):
-            arr = np.hstack((arr,np.array(ivp_input)))
+        if sympy.shape(arr)[1] == len(ivp_input) and sympy.shape(arr)[0] == sympy.shape(arr)[1]:
+            arr.col_insert(len(ivp_input), sympy.Matrix(ivp_input))
         else:
             print(f"IVP 7: Your initial values don't have the proper number to determine a unique solution")
             # Work on adding support for ivp input that follows the structure of a dictionary for a given indexed value
-        sp_matrix = sympy.Matrix(arr)
-        print(f"IVP 5: Original matrix is: {sp_matrix}")
-        sp_matrix = sp_matrix.rref()[0]
-        print(f"Solved matrix is: {sp_matrix}")
-        print("\n")
+        if (len(ivp_input) == 0 and (abs(sympy.shape(arr)[0] - sympy.shape(arr)[1]) == 1)):           
+            
+            print(f"IVP 5: Original matrix is: {arr}")
+            solved_matrix = arr.rref()[0]
+            print(f"Solved matrix is: {solved_matrix}")
+            print("\n")
 
-        constants = []
-        for idx in range(sp_matrix.rows):
-            row = sp_matrix.row(idx)
-            print(row)
-            if list(row).count(0) == len(row)-2 and row[idx] != 0:
-                constants.append(row[-1]/row[idx])
-            else:
-                print("IVP 6: Your constants are not linearly independent from at least how you've sent them to me!")
+            constants = []
+            for idx in range(solved_matrix.rows):
+                row = solved_matrix.row(idx)
+                print(row)
+                if list(row).count(0) == len(row)-2 and row[idx] != 0:
+                    constants.append(row[-1]/row[idx])
+                else:
+                    print("IVP 6: Your constants are not linearly independent from at least how you've sent them to me!")
 
         print(constants)
                 

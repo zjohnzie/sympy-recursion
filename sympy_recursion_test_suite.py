@@ -1,7 +1,7 @@
 import sympy_recursion_main as srm
 import sympy
 
-print("\n--------------------\n STARTING TEST CASES \n--------------------\n")
+print("\n---------------------\n STARTING TEST CASES \n---------------------\n")
 
 sqrt5 = sympy.sqrt(5)
 x, y, z = sympy.symbols('x y x')
@@ -16,50 +16,56 @@ f0, f1, f2, f3, f4, f5, f10 = sympy.symbols('f0 f1 f2 f3 f4 f5 f10')
 expr = 2*f0 + 3*f1 - f2
 print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
-print(f"{srm.recursion_format_processing(expr)}")
-print(f"{srm.sym_recursion_solver_main(expr)}")
-print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
+print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),2,5)}")
+print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),[1,1])}")
+print(f"IVP Matrix returned is: {srm.ivp_calculation(srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),2,5))}")
+print(f"IVP matrix returned is: {srm.ivp_calculation(srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),[1,1]))}")
+
+
 
 
 expr = f0 + 2**2*f1 - f2 + 10*f10 
 print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
-print(f"{srm.recursion_format_processing(expr)}")
-print(f"{srm.sym_recursion_solver_main(expr)}")
-print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
+print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 
 
 expr = "f0 + 2**2*f1 - f2 + 10*f10   "
 print(expr)
-#print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
-print(f"{srm.recursion_format_processing(expr)}")
-print(f"{srm.sym_recursion_solver_main(expr)}")
-print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
+print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
+print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 
 expr = f1 + f2 + f3
 print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
-print(f"{srm.recursion_format_processing(expr)}")
-print(f"{srm.sym_recursion_solver_main(expr)}")
-print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
+print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 
 expr = "  f1  + f2 + f3"
 print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
-print(f"{srm.recursion_format_processing(expr)}")
-print(f"{srm.sym_recursion_solver_main(expr)}")
-print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
+print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 
 expr = f0 + f1 + f2 + f3 + f4
 print(expr)
 print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
-print(f"{srm.recursion_format_processing(expr)}")
-print(f"{srm.sym_recursion_solver_main(expr)}")
-print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
+print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
 
 '''
 
