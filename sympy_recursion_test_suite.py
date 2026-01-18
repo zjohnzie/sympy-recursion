@@ -23,6 +23,11 @@ print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),2,5)}")
 print(f"{srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),[1,1])}")
 print(f"IVP Matrix returned is: {srm.ivp_calculation(srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),2,5))}")
 print(f"IVP matrix returned is: {srm.ivp_calculation(srm.solution_to_matrix(srm.sym_recursion_solver_main(expr),[1,1]))}")
+print(f"Specific expression returned is: {srm.sym_recursion_solver_main([expr])}")
+print(f"Specific expression returned is: {srm.sym_recursion_solver_main(expr)}")
+print(f"TEST TEST TEST \n TEST IVP TEST \n TEST TEST TEST")
+print(f"Specific expression returned is: {srm.sym_recursion_solver_main([expr, [1,1,1]])}")
+print(f"Specific expression returned is: {srm.sym_recursion_solver_main([expr, [1,1]])}")
 
 
 
@@ -33,6 +38,8 @@ print(f"Expression returned is: {srm.expression_to_sequence(expr)}")
 print(f"Formatted expression returned is: {srm.recursion_format_processing(expr)}")
 print(f"Main expression returned is: {srm.sym_recursion_solver_main(expr)}")
 print(f"Matrix returned is: {srm.solution_to_matrix(srm.sym_recursion_solver_main(expr))}")
+print(f"Specific expression returned is: {srm.sym_recursion_solver_main([expr])}")
+      
 
 
 
